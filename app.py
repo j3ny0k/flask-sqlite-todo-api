@@ -5,6 +5,7 @@ from db import (
     get_all_tasks,
     get_task_by_id,
     update_task_done,
+    update_task_priority,
     delete_task_by_id,
     delete_all_tasks,
 )
@@ -28,6 +29,12 @@ def api_create_task():
     done = data["done"]
     priority = data["priority"]
 
+    if done not in [0, 1]:
+        return jsonify({"error": "done must be 0 or 1"}), 400
+
+    if priority not in [1, 2, 3]:
+        return jsonify({"error": "priority must be 1, 2 or 3"}), 400
+
     task_id = create_task(title, done, priority)
 
     return jsonify({"id": task_id}), 201
@@ -49,7 +56,7 @@ def api_get_task_by_id(task_id):
     return jsonify(task), 200
 
 
-@app.patch("/api/tasks/<int:task_id>")
+@app.patch("/api/tasks/done/<int:task_id>")
 def api_update_task_done(task_id):
     data = request.get_json()
 
@@ -62,6 +69,27 @@ def api_update_task_done(task_id):
         return jsonify({"error": "done must be 0 or 1"}), 400
 
     updated_count = update_task_done(task_id, done)
+
+    if updated_count == 0:
+        return jsonify({"error": "task not found"}), 404
+
+    task = get_task_by_id(task_id)
+    return jsonify(task), 200
+
+
+@app.patch("/api/tasks/priority/<int:task_id>")
+def api_update_task_priority(task_id):
+    data = request.get_json()
+
+    if not data or "priority" not in data:
+        return jsonify({"error": "priority is required"}), 400
+
+    priority = data["priority"]
+
+    if priority not in [1, 2, 3]:
+        return jsonify({"error": "priority must be 1, 2 or 3"}), 400
+
+    updated_count = update_task_priority(task_id, priority)
 
     if updated_count == 0:
         return jsonify({"error": "task not found"}), 404

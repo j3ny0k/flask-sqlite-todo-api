@@ -2,18 +2,32 @@
 
 A simple REST API for managing tasks built with Flask and SQLite.
 
-This is a learning backend project that demonstrates basic CRUD operations, routing, JSON requests, JSON responses, and working with a SQLite database through a separate database layer.
+This is a learning backend project that demonstrates:
+
+- Flask routes
+- JSON requests
+- JSON responses
+- HTTP status codes
+- SQLite database usage
+- CRUD operations
+- separating API logic from database logic
+
+---
 
 ## Features
 
+- Check if the API is running
 - Get all tasks
 - Get one task by id
 - Create a new task
 - Update task `done` status
+- Update task `priority`
 - Delete one task by id
 - Delete all tasks
-- Store data in SQLite
-- Separate Flask routes from database logic
+- Store tasks in SQLite
+- Separate Flask routes from SQLite logic
+
+---
 
 ## Tech Stack
 
@@ -22,6 +36,8 @@ This is a learning backend project that demonstrates basic CRUD operations, rout
 - SQLite
 - REST API
 - JSON
+
+---
 
 ## Project Structure
 
@@ -35,11 +51,23 @@ flask-sqlite-todo-api/
 └── README.md           # Project documentation
 ```
 
+---
+
 ## Database Model
 
-The project uses a SQLite database file named `tasks.db`.
+The project uses a SQLite database file:
 
-The `tasks` table has these columns:
+```text
+tasks.db
+```
+
+The database contains one table:
+
+```text
+tasks
+```
+
+### Table Columns
 
 | Column     | Type    | Description             |
 | ---------- | ------- | ----------------------- |
@@ -48,7 +76,15 @@ The `tasks` table has these columns:
 | `done`     | INTEGER | Task status: `0` or `1` |
 | `priority` | INTEGER | Task priority           |
 
-Example task row:
+### Priority Values
+
+```text
+1 → high
+2 → normal
+3 → low
+```
+
+### Example Row
 
 ```text
 (1, "learn Flask", 0, 2)
@@ -62,6 +98,8 @@ title    → "learn Flask"
 done     → 0
 priority → 2
 ```
+
+---
 
 ## Installation
 
@@ -78,11 +116,15 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
-## requirements.txt
+---
+
+## Requirements
 
 ```txt
 Flask
 ```
+
+---
 
 ## Run the Project
 
@@ -96,21 +138,28 @@ The server will start at:
 http://127.0.0.1:5000
 ```
 
+When the app starts, it calls `init_db()` and creates the `tasks` table if it does not exist.
+
+---
+
 ## API Routes
 
-| Method   | Route             | Description               |
-| -------- | ----------------- | ------------------------- |
-| `GET`    | `/`               | Check if Flask is working |
-| `GET`    | `/api/tasks`      | Get all tasks             |
-| `GET`    | `/api/tasks/<id>` | Get one task by id        |
-| `POST`   | `/api/tasks`      | Create a new task         |
-| `PATCH`  | `/api/tasks/<id>` | Update task `done` status |
-| `DELETE` | `/api/tasks/<id>` | Delete one task by id     |
-| `DELETE` | `/api/tasks`      | Delete all tasks          |
+| Method   | Route                      | Description               |
+| -------- | -------------------------- | ------------------------- |
+| `GET`    | `/`                        | Check if Flask is working |
+| `GET`    | `/api/tasks`               | Get all tasks             |
+| `GET`    | `/api/tasks/<id>`          | Get one task by id        |
+| `POST`   | `/api/tasks`               | Create a new task         |
+| `PATCH`  | `/api/tasks/done/<id>`     | Update task `done` status |
+| `PATCH`  | `/api/tasks/priority/<id>` | Update task `priority`    |
+| `DELETE` | `/api/tasks/<id>`          | Delete one task by id     |
+| `DELETE` | `/api/tasks`               | Delete all tasks          |
 
 ---
 
 # API Examples
+
+---
 
 ## Home Route
 
@@ -148,8 +197,8 @@ GET /api/tasks
 
 ```json
 [
-  [1, "learn Flask", 0, 2],
-  [2, "practice SQLite", 1, 2]
+  [2, "practice SQLite", 1, 2],
+  [1, "learn Flask", 0, 2]
 ]
 ```
 
@@ -163,6 +212,12 @@ If there are no tasks:
 
 ```json
 []
+```
+
+Status code:
+
+```text
+200 OK
 ```
 
 ---
@@ -187,7 +242,7 @@ Status code:
 200 OK
 ```
 
-### If task does not exist
+### If Task Does Not Exist
 
 ```json
 {
@@ -236,6 +291,8 @@ Status code:
 201 CREATED
 ```
 
+---
+
 ### Required Fields
 
 The request body must contain:
@@ -262,12 +319,63 @@ Status code:
 
 ---
 
+### Done Validation
+
+The `done` value must be:
+
+```text
+0 → not done
+1 → done
+```
+
+If `done` is not `0` or `1`:
+
+```json
+{
+  "error": "done must be 0 or 1"
+}
+```
+
+Status code:
+
+```text
+400 BAD REQUEST
+```
+
+---
+
+### Priority Validation
+
+The `priority` value must be:
+
+```text
+1 → high
+2 → normal
+3 → low
+```
+
+If `priority` is not `1`, `2`, or `3`:
+
+```json
+{
+  "error": "priority must be 1, 2 or 3"
+}
+```
+
+Status code:
+
+```text
+400 BAD REQUEST
+```
+
+---
+
 ## Update Task Done Status
 
 ### Request
 
 ```http
-PATCH /api/tasks/1
+PATCH /api/tasks/done/1
 Content-Type: application/json
 ```
 
@@ -291,13 +399,14 @@ Status code:
 200 OK
 ```
 
-### Validation
+---
 
-The `done` value must be:
+### Required Field
+
+The request body must contain:
 
 ```text
-0 → not done
-1 → done
+done
 ```
 
 If `done` is missing:
@@ -314,6 +423,17 @@ Status code:
 400 BAD REQUEST
 ```
 
+---
+
+### Done Validation
+
+The `done` value must be:
+
+```text
+0 → not done
+1 → done
+```
+
 If `done` is not `0` or `1`:
 
 ```json
@@ -328,7 +448,106 @@ Status code:
 400 BAD REQUEST
 ```
 
-If task does not exist:
+---
+
+### If Task Does Not Exist
+
+```json
+{
+  "error": "task not found"
+}
+```
+
+Status code:
+
+```text
+404 NOT FOUND
+```
+
+---
+
+## Update Task Priority
+
+### Request
+
+```http
+PATCH /api/tasks/priority/1
+Content-Type: application/json
+```
+
+### Body
+
+```json
+{
+  "priority": 1
+}
+```
+
+### Response
+
+```json
+[1, "learn Flask", 0, 1]
+```
+
+Status code:
+
+```text
+200 OK
+```
+
+---
+
+### Required Field
+
+The request body must contain:
+
+```text
+priority
+```
+
+If `priority` is missing:
+
+```json
+{
+  "error": "priority is required"
+}
+```
+
+Status code:
+
+```text
+400 BAD REQUEST
+```
+
+---
+
+### Priority Validation
+
+The `priority` value must be:
+
+```text
+1 → high
+2 → normal
+3 → low
+```
+
+If `priority` is not `1`, `2`, or `3`:
+
+```json
+{
+  "error": "priority must be 1, 2 or 3"
+}
+```
+
+Status code:
+
+```text
+400 BAD REQUEST
+```
+
+---
+
+### If Task Does Not Exist
 
 ```json
 {
@@ -366,7 +585,9 @@ Status code:
 200 OK
 ```
 
-### If task does not exist
+---
+
+### If Task Does Not Exist
 
 ```json
 {
@@ -418,7 +639,12 @@ Status code:
 200 OK
 ```
 
-After deleting all tasks, the SQLite auto-increment counter is reset. The next created task will start again from `id = 1`.
+After deleting all tasks, the SQLite auto-increment counter is reset.  
+The next created task will start again from:
+
+```text
+id = 1
+```
 
 ---
 
@@ -432,9 +658,12 @@ It is responsible for:
 
 - receiving HTTP requests
 - reading JSON request data
+- validating request data
 - calling functions from `db.py`
 - returning JSON responses
-- returning correct status codes
+- returning correct HTTP status codes
+
+---
 
 ## db.py
 
@@ -451,29 +680,102 @@ It is responsible for:
 - committing database changes
 - closing the database connection
 
+---
+
 ## Data Flow
 
-Example for creating a task:
+### Creating a Task
 
 ```text
 Client sends POST /api/tasks
 → Flask receives JSON body
-→ app.py reads title, done, priority
+→ app.py checks title, done, priority
+→ app.py validates done and priority
 → app.py calls create_task(title, done, priority)
 → db.py inserts the task into SQLite
 → SQLite creates a new id
 → db.py returns the new id
-→ app.py returns JSON response
+→ app.py returns JSON response with the id
 ```
 
-Example for getting all tasks:
+---
+
+### Getting All Tasks
 
 ```text
 Client sends GET /api/tasks
 → Flask route is called
 → app.py calls get_all_tasks()
 → db.py reads rows from SQLite
+→ db.py returns rows
 → app.py returns rows as JSON
+```
+
+---
+
+### Updating Task Done Status
+
+```text
+Client sends PATCH /api/tasks/done/<id>
+→ Flask receives JSON body
+→ app.py checks and validates done
+→ app.py calls update_task_done(task_id, done)
+→ db.py updates the task in SQLite
+→ app.py gets the updated task
+→ app.py returns the updated task as JSON
+```
+
+---
+
+### Updating Task Priority
+
+```text
+Client sends PATCH /api/tasks/priority/<id>
+→ Flask receives JSON body
+→ app.py checks and validates priority
+→ app.py calls update_task_priority(task_id, priority)
+→ db.py updates the task in SQLite
+→ app.py gets the updated task
+→ app.py returns the updated task as JSON
+```
+
+---
+
+### Deleting a Task
+
+```text
+Client sends DELETE /api/tasks/<id>
+→ Flask route is called
+→ app.py calls delete_task_by_id(task_id)
+→ db.py deletes the task from SQLite
+→ app.py returns success message
+```
+
+---
+
+# Current Response Format
+
+Tasks are currently returned as lists:
+
+```json
+[1, "learn Flask", 0, 2]
+```
+
+Meaning:
+
+```text
+[ id, title, done, priority ]
+```
+
+A future improvement would be returning tasks as JSON objects:
+
+```json
+{
+  "id": 1,
+  "title": "learn Flask",
+  "done": 0,
+  "priority": 2
+}
 ```
 
 ---
@@ -488,13 +790,15 @@ It focuses on:
 - SQLite basics
 - CRUD operations
 - JSON request and response
+- HTTP status codes
 - separating API logic from database logic
 
 This project does not include:
 
 - user authentication
 - frontend interface
-- advanced validation
+- advanced title validation
+- tests
 - deployment configuration
 - production database setup
 
@@ -505,29 +809,12 @@ This project does not include:
 Future improvements:
 
 - Return tasks as JSON objects instead of lists
-- Add better validation for `title`, `done`, and `priority`
-- Add update route for task title and priority
+- Add better validation for `title`
+- Add update route for task title
 - Add pagination
 - Add tests
 - Add Docker support later
 - Add deployment instructions later
-
-Example of a better future response format:
-
-```json
-{
-  "id": 1,
-  "title": "learn Flask",
-  "done": 0,
-  "priority": 2
-}
-```
-
-Current response format:
-
-```json
-[1, "learn Flask", 0, 2]
-```
 
 ---
 
@@ -538,4 +825,7 @@ Current version:
 - Basic CRUD works
 - SQLite database works
 - Flask routes work
-- Project is ready for first GitHub upload as a learning backend project
+- Request validation for `done` works
+- Request validation for `priority` works
+- Separate database layer exists
+- Project is ready for GitHub upload as a learning backend project

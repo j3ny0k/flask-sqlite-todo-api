@@ -82,6 +82,20 @@ def update_task_done(task_id, done):
     return updated_count
 
 
+def update_task_priority(task_id, priority):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("UPDATE tasks SET priority = ? WHERE id = ?", (priority, task_id))
+
+    updated_count = cursor.rowcount
+
+    conn.commit()
+    conn.close()
+
+    return updated_count
+
+
 def delete_task_by_id(task_id):
     conn = get_connection()
     cursor = conn.cursor()
