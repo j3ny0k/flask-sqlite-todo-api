@@ -1,5 +1,15 @@
 import sqlite3
 
+
+def row_to_task(row):
+    return {
+        "id": row[0],
+        "title": row[1],
+        "done": row[2],
+        "priority": row[3],
+    }
+
+
 DB_NAME = "tasks.db"
 
 
@@ -50,8 +60,10 @@ def get_all_tasks():
     cursor.execute("SELECT id, title, done, priority FROM tasks ORDER BY id DESC")
     rows = cursor.fetchall()
 
+    tasks = [row_to_task(row) for row in rows]
+
     conn.close()
-    return rows
+    return tasks
 
 
 def get_task_by_id(task_id):
@@ -65,7 +77,11 @@ def get_task_by_id(task_id):
     row = cursor.fetchone()
 
     conn.close()
-    return row
+
+    if row is None:
+        return None
+
+    return row_to_task(row)
 
 
 def update_task_done(task_id, done):

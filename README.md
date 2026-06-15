@@ -26,6 +26,7 @@ This is a learning backend project that demonstrates:
 - Delete all tasks
 - Store tasks in SQLite
 - Separate Flask routes from SQLite logic
+- Return tasks as JSON objects
 
 ---
 
@@ -197,8 +198,18 @@ GET /api/tasks
 
 ```json
 [
-  [2, "practice SQLite", 1, 2],
-  [1, "learn Flask", 0, 2]
+  {
+    "id": 2,
+    "title": "practice SQLite",
+    "done": 1,
+    "priority": 2
+  },
+  {
+    "id": 1,
+    "title": "learn Flask",
+    "done": 0,
+    "priority": 2
+  }
 ]
 ```
 
@@ -233,7 +244,12 @@ GET /api/tasks/1
 ### Response
 
 ```json
-[1, "learn Flask", 0, 2]
+{
+  "id": 1,
+  "title": "learn Flask",
+  "done": 0,
+  "priority": 2
+}
 ```
 
 Status code:
@@ -290,6 +306,8 @@ Status code:
 ```text
 201 CREATED
 ```
+
+The `id` can be different depending on the current database state.
 
 ---
 
@@ -390,7 +408,12 @@ Content-Type: application/json
 ### Response
 
 ```json
-[1, "learn Flask", 1, 2]
+{
+  "id": 1,
+  "title": "learn Flask",
+  "done": 1,
+  "priority": 2
+}
 ```
 
 Status code:
@@ -486,7 +509,12 @@ Content-Type: application/json
 ### Response
 
 ```json
-[1, "learn Flask", 0, 1]
+{
+  "id": 1,
+  "title": "learn Flask",
+  "done": 0,
+  "priority": 1
+}
 ```
 
 Status code:
@@ -639,7 +667,7 @@ Status code:
 200 OK
 ```
 
-After deleting all tasks, the SQLite auto-increment counter is reset.  
+After deleting all tasks, the SQLite auto-increment counter is reset.
 The next created task will start again from:
 
 ```text
@@ -675,6 +703,7 @@ It is responsible for:
 - creating the `tasks` table
 - inserting tasks
 - selecting tasks
+- converting SQLite rows into JSON-friendly dictionaries
 - updating tasks
 - deleting tasks
 - committing database changes
@@ -707,8 +736,22 @@ Client sends GET /api/tasks
 → Flask route is called
 → app.py calls get_all_tasks()
 → db.py reads rows from SQLite
-→ db.py returns rows
-→ app.py returns rows as JSON
+→ db.py converts each row into a task object
+→ db.py returns a list of task objects
+→ app.py returns the list as JSON
+```
+
+---
+
+### Getting One Task
+
+```text
+Client sends GET /api/tasks/<id>
+→ Flask route is called
+→ app.py calls get_task_by_id(task_id)
+→ db.py reads one row from SQLite
+→ if the row exists, db.py converts it into a task object
+→ app.py returns the task object as JSON
 ```
 
 ---
@@ -722,7 +765,7 @@ Client sends PATCH /api/tasks/done/<id>
 → app.py calls update_task_done(task_id, done)
 → db.py updates the task in SQLite
 → app.py gets the updated task
-→ app.py returns the updated task as JSON
+→ app.py returns the updated task object as JSON
 ```
 
 ---
@@ -736,7 +779,7 @@ Client sends PATCH /api/tasks/priority/<id>
 → app.py calls update_task_priority(task_id, priority)
 → db.py updates the task in SQLite
 → app.py gets the updated task
-→ app.py returns the updated task as JSON
+→ app.py returns the updated task object as JSON
 ```
 
 ---
@@ -755,19 +798,7 @@ Client sends DELETE /api/tasks/<id>
 
 # Current Response Format
 
-Tasks are currently returned as lists:
-
-```json
-[1, "learn Flask", 0, 2]
-```
-
-Meaning:
-
-```text
-[ id, title, done, priority ]
-```
-
-A future improvement would be returning tasks as JSON objects:
+Tasks are returned as JSON objects:
 
 ```json
 {
@@ -776,6 +807,19 @@ A future improvement would be returning tasks as JSON objects:
   "done": 0,
   "priority": 2
 }
+```
+
+A list of tasks is returned as an array of objects:
+
+```json
+[
+  {
+    "id": 1,
+    "title": "learn Flask",
+    "done": 0,
+    "priority": 2
+  }
+]
 ```
 
 ---
@@ -792,13 +836,14 @@ It focuses on:
 - JSON request and response
 - HTTP status codes
 - separating API logic from database logic
+- converting database rows into clean API responses
 
 This project does not include:
 
 - user authentication
 - frontend interface
 - advanced title validation
-- tests
+- automated tests
 - deployment configuration
 - production database setup
 
@@ -808,11 +853,11 @@ This project does not include:
 
 Future improvements:
 
-- Return tasks as JSON objects instead of lists
 - Add better validation for `title`
-- Add update route for task title
+- Add update route for task `title`
+- Add query filters for `done` and `priority`
 - Add pagination
-- Add tests
+- Add automated tests
 - Add Docker support later
 - Add deployment instructions later
 
@@ -828,4 +873,5 @@ Current version:
 - Request validation for `done` works
 - Request validation for `priority` works
 - Separate database layer exists
+- Tasks are returned as JSON objects
 - Project is ready for GitHub upload as a learning backend project
