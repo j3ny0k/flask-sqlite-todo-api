@@ -84,6 +84,20 @@ def get_task_by_id(task_id):
     return row_to_task(row)
 
 
+def update_task_title(task_id, title):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("UPDATE tasks SET title = ? WHERE id = ?", (title, task_id))
+
+    updated_count = cursor.rowcount
+
+    conn.commit()
+    conn.close()
+
+    return updated_count
+
+
 def update_task_done(task_id, done):
     conn = get_connection()
     cursor = conn.cursor()

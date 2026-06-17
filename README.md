@@ -21,6 +21,7 @@ This is a learning backend project that demonstrates:
 - Get all tasks
 - Get one task by id
 - Create a new task
+- Update task `title`
 - Update task `done` status
 - Update task `priority`
 - Delete one task by id
@@ -153,6 +154,7 @@ When the app starts, it calls `init_db()` and creates the `tasks` table if it do
 | `GET`    | `/api/tasks`               | Get all tasks             |
 | `GET`    | `/api/tasks/<id>`          | Get one task by id        |
 | `POST`   | `/api/tasks`               | Create a new task         |
+| `PATCH`  | `/api/tasks/title/<id>`    | Update task `title`       |
 | `PATCH`  | `/api/tasks/done/<id>`     | Update task `done` status |
 | `PATCH`  | `/api/tasks/priority/<id>` | Update task `priority`    |
 | `DELETE` | `/api/tasks/<id>`          | Delete one task by id     |
@@ -434,6 +436,102 @@ Status code:
 
 ```text
 400 BAD REQUEST
+```
+
+---
+
+## Update Task Title
+
+### Request
+
+```http
+PATCH /api/tasks/title/1
+Content-Type: application/json
+```
+
+### Body
+
+```json
+{
+  "title": "new title"
+}
+```
+
+### Response
+
+```json
+{
+  "id": 1,
+  "title": "new title",
+  "done": 0,
+  "priority": 2
+}
+```
+
+Status code:
+
+```text
+200 OK
+```
+
+---
+
+### Required Field
+
+The request body must contain:
+
+```text
+title
+```
+
+If `title` is missing:
+
+```json
+{
+  "error": "title is required"
+}
+```
+
+Status code:
+
+```text
+400 BAD REQUEST
+```
+
+---
+
+### Title Validation
+
+The `title` value must be a non-empty string.
+
+If `title` is empty or contains only spaces:
+
+```json
+{
+  "error": "title must be a non-empty string"
+}
+```
+
+Status code:
+
+```text
+400 BAD REQUEST
+```
+
+---
+
+### If Task Does Not Exist
+
+```json
+{
+  "error": "task not found"
+}
+```
+
+Status code:
+
+```text
+404 NOT FOUND
 ```
 
 ---
@@ -903,7 +1001,6 @@ This project does not include:
 
 - user authentication
 - frontend interface
-- update route for task `title`
 - query filters
 - automated tests
 - deployment configuration
@@ -915,7 +1012,6 @@ This project does not include:
 
 Future improvements:
 
-- Add update route for task `title`
 - Add query filters for `done` and `priority`
 - Add maximum title length validation
 - Add pagination
@@ -939,3 +1035,4 @@ Current version:
 - Tasks are returned as JSON objects
 - Main routes were manually checked
 - Project is ready for GitHub upload as a learning backend project
+- Task `title` update route works

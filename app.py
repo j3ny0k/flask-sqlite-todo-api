@@ -4,6 +4,7 @@ from db import (
     create_task,
     get_all_tasks,
     get_task_by_id,
+    update_task_title,
     update_task_done,
     update_task_priority,
     delete_task_by_id,
@@ -57,6 +58,27 @@ def api_get_task_by_id(task_id):
     if task is None:
         return jsonify({"error": "task not found"}), 404
 
+    return jsonify(task), 200
+
+
+@app.patch("/api/tasks/title/<int:task_id>")
+def api_update_task_title(task_id):
+    data = request.get_json()
+
+    if not data or "title" not in data:
+        return jsonify({"error": "title is required"}), 400
+
+    title = data["title"]
+
+    if not isinstance(title, str) or not title.strip():
+        return jsonify({"error": "title must be a non-empty string"}), 400
+
+    updated_count = update_task_title(task_id, title)
+
+    if updated_count == 0:
+        return jsonify({"error": "task not found"}), 404
+
+    task = get_task_by_id(task_id)
     return jsonify(task), 200
 
 
