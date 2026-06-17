@@ -10,6 +10,7 @@ This is a learning backend project that demonstrates:
 - HTTP status codes
 - SQLite database usage
 - CRUD operations
+- request validation
 - separating API logic from database logic
 
 ---
@@ -27,6 +28,7 @@ This is a learning backend project that demonstrates:
 - Store tasks in SQLite
 - Separate Flask routes from SQLite logic
 - Return tasks as JSON objects
+- Validate `title`, `done`, and `priority`
 
 ---
 
@@ -159,6 +161,12 @@ When the app starts, it calls `init_db()` and creates the `tasks` table if it do
 ---
 
 # API Examples
+
+Base URL:
+
+```text
+http://127.0.0.1:5000
+```
 
 ---
 
@@ -311,6 +319,8 @@ The `id` can be different depending on the current database state.
 
 ---
 
+## Create Task Validation
+
 ### Required Fields
 
 The request body must contain:
@@ -326,6 +336,46 @@ If one of these fields is missing:
 ```json
 {
   "error": "title, done and priority are required"
+}
+```
+
+Status code:
+
+```text
+400 BAD REQUEST
+```
+
+---
+
+### Title Validation
+
+The `title` value must be a non-empty string.
+
+Invalid example:
+
+```json
+{
+  "title": "",
+  "done": 0,
+  "priority": 2
+}
+```
+
+Invalid example:
+
+```json
+{
+  "title": "   ",
+  "done": 0,
+  "priority": 2
+}
+```
+
+Response:
+
+```json
+{
+  "error": "title must be a non-empty string"
 }
 ```
 
@@ -668,6 +718,7 @@ Status code:
 ```
 
 After deleting all tasks, the SQLite auto-increment counter is reset.
+
 The next created task will start again from:
 
 ```text
@@ -719,7 +770,7 @@ It is responsible for:
 Client sends POST /api/tasks
 → Flask receives JSON body
 → app.py checks title, done, priority
-→ app.py validates done and priority
+→ app.py validates title, done, and priority
 → app.py calls create_task(title, done, priority)
 → db.py inserts the task into SQLite
 → SQLite creates a new id
@@ -752,6 +803,13 @@ Client sends GET /api/tasks/<id>
 → db.py reads one row from SQLite
 → if the row exists, db.py converts it into a task object
 → app.py returns the task object as JSON
+```
+
+If the task does not exist:
+
+```text
+db.py returns None
+→ app.py returns 404 NOT FOUND
 ```
 
 ---
@@ -822,6 +880,8 @@ A list of tasks is returned as an array of objects:
 ]
 ```
 
+The order of JSON object keys can differ depending on the client or framework settings. The important part is that the response contains the correct keys and values.
+
 ---
 
 # Notes
@@ -835,6 +895,7 @@ It focuses on:
 - CRUD operations
 - JSON request and response
 - HTTP status codes
+- request validation
 - separating API logic from database logic
 - converting database rows into clean API responses
 
@@ -842,7 +903,8 @@ This project does not include:
 
 - user authentication
 - frontend interface
-- advanced title validation
+- update route for task `title`
+- query filters
 - automated tests
 - deployment configuration
 - production database setup
@@ -853,9 +915,9 @@ This project does not include:
 
 Future improvements:
 
-- Add better validation for `title`
 - Add update route for task `title`
 - Add query filters for `done` and `priority`
+- Add maximum title length validation
 - Add pagination
 - Add automated tests
 - Add Docker support later
@@ -870,8 +932,10 @@ Current version:
 - Basic CRUD works
 - SQLite database works
 - Flask routes work
+- Request validation for `title` works
 - Request validation for `done` works
 - Request validation for `priority` works
 - Separate database layer exists
 - Tasks are returned as JSON objects
+- Main routes were manually checked
 - Project is ready for GitHub upload as a learning backend project

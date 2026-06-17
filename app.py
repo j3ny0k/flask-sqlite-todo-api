@@ -26,6 +26,10 @@ def api_create_task():
         return jsonify({"error": "title, done and priority are required"}), 400
 
     title = data["title"]
+
+    if not isinstance(title, str) or not title.strip():
+        return jsonify({"error": "title must be a non-empty string"}), 400
+
     done = data["done"]
     priority = data["priority"]
 
