@@ -11,6 +11,7 @@ This is a learning backend project that demonstrates:
 - SQLite database usage
 - CRUD operations
 - request validation
+- query parameters
 - separating API logic from database logic
 
 ---
@@ -20,6 +21,8 @@ This is a learning backend project that demonstrates:
 - Check if the API is running
 - Get all tasks
 - Get one task by id
+- Filter tasks by `done`
+- Filter tasks by `priority`
 - Create a new task
 - Update task `title`
 - Update task `done` status
@@ -79,6 +82,13 @@ tasks
 | `title`    | TEXT    | Task title              |
 | `done`     | INTEGER | Task status: `0` or `1` |
 | `priority` | INTEGER | Task priority           |
+
+### Done Values
+
+```text
+0 → not done
+1 → done
+```
 
 ### Priority Values
 
@@ -148,17 +158,17 @@ When the app starts, it calls `init_db()` and creates the `tasks` table if it do
 
 ## API Routes
 
-| Method   | Route                      | Description               |
-| -------- | -------------------------- | ------------------------- |
-| `GET`    | `/`                        | Check if Flask is working |
-| `GET`    | `/api/tasks`               | Get all tasks             |
-| `GET`    | `/api/tasks/<id>`          | Get one task by id        |
-| `POST`   | `/api/tasks`               | Create a new task         |
-| `PATCH`  | `/api/tasks/title/<id>`    | Update task `title`       |
-| `PATCH`  | `/api/tasks/done/<id>`     | Update task `done` status |
-| `PATCH`  | `/api/tasks/priority/<id>` | Update task `priority`    |
-| `DELETE` | `/api/tasks/<id>`          | Delete one task by id     |
-| `DELETE` | `/api/tasks`               | Delete all tasks          |
+| Method   | Route                      | Description                     |
+| -------- | -------------------------- | ------------------------------- |
+| `GET`    | `/`                        | Check if Flask is working       |
+| `GET`    | `/api/tasks`               | Get all tasks or filtered tasks |
+| `GET`    | `/api/tasks/<id>`          | Get one task by id              |
+| `POST`   | `/api/tasks`               | Create a new task               |
+| `PATCH`  | `/api/tasks/title/<id>`    | Update task `title`             |
+| `PATCH`  | `/api/tasks/done/<id>`     | Update task `done` status       |
+| `PATCH`  | `/api/tasks/priority/<id>` | Update task `priority`          |
+| `DELETE` | `/api/tasks/<id>`          | Delete one task by id           |
+| `DELETE` | `/api/tasks`               | Delete all tasks                |
 
 ---
 
@@ -239,6 +249,283 @@ Status code:
 
 ```text
 200 OK
+```
+
+---
+
+## Query Filters
+
+The `GET /api/tasks` route supports single query filters.
+
+Supported filters:
+
+```text
+done
+priority
+```
+
+Currently, the API supports one filter at a time.
+
+---
+
+### Filter Tasks by Done Status
+
+### Request
+
+```http
+GET /api/tasks?done=0
+```
+
+Returns tasks where:
+
+```text
+done = 0
+```
+
+Meaning:
+
+```text
+not done
+```
+
+### Response
+
+```json
+[
+  {
+    "id": 1,
+    "title": "learn Flask",
+    "done": 0,
+    "priority": 2
+  }
+]
+```
+
+Status code:
+
+```text
+200 OK
+```
+
+---
+
+### Request
+
+```http
+GET /api/tasks?done=1
+```
+
+Returns tasks where:
+
+```text
+done = 1
+```
+
+Meaning:
+
+```text
+done
+```
+
+### Response
+
+```json
+[
+  {
+    "id": 2,
+    "title": "practice SQLite",
+    "done": 1,
+    "priority": 2
+  }
+]
+```
+
+Status code:
+
+```text
+200 OK
+```
+
+---
+
+### Done Query Validation
+
+The `done` query value must be:
+
+```text
+0
+1
+```
+
+Invalid request:
+
+```http
+GET /api/tasks?done=abc
+```
+
+Response:
+
+```json
+{
+  "error": "done must be 0 or 1"
+}
+```
+
+Status code:
+
+```text
+400 BAD REQUEST
+```
+
+---
+
+## Filter Tasks by Priority
+
+### Request
+
+```http
+GET /api/tasks?priority=1
+```
+
+Returns tasks where:
+
+```text
+priority = 1
+```
+
+Meaning:
+
+```text
+high priority
+```
+
+### Response
+
+```json
+[
+  {
+    "id": 1,
+    "title": "learn Flask",
+    "done": 0,
+    "priority": 1
+  }
+]
+```
+
+Status code:
+
+```text
+200 OK
+```
+
+---
+
+### Request
+
+```http
+GET /api/tasks?priority=2
+```
+
+Returns tasks where:
+
+```text
+priority = 2
+```
+
+Meaning:
+
+```text
+normal priority
+```
+
+### Response
+
+```json
+[
+  {
+    "id": 2,
+    "title": "practice SQLite",
+    "done": 1,
+    "priority": 2
+  }
+]
+```
+
+Status code:
+
+```text
+200 OK
+```
+
+---
+
+### Request
+
+```http
+GET /api/tasks?priority=3
+```
+
+Returns tasks where:
+
+```text
+priority = 3
+```
+
+Meaning:
+
+```text
+low priority
+```
+
+### Response
+
+```json
+[
+  {
+    "id": 3,
+    "title": "read documentation",
+    "done": 0,
+    "priority": 3
+  }
+]
+```
+
+Status code:
+
+```text
+200 OK
+```
+
+---
+
+### Priority Query Validation
+
+The `priority` query value must be:
+
+```text
+1
+2
+3
+```
+
+Invalid request:
+
+```http
+GET /api/tasks?priority=abc
+```
+
+Response:
+
+```json
+{
+  "error": "priority must be 1, 2 or 3"
+}
+```
+
+Status code:
+
+```text
+400 BAD REQUEST
 ```
 
 ---
@@ -835,6 +1122,7 @@ It is responsible for:
 
 - receiving HTTP requests
 - reading JSON request data
+- reading query parameters
 - validating request data
 - calling functions from `db.py`
 - returning JSON responses
@@ -852,6 +1140,8 @@ It is responsible for:
 - creating the `tasks` table
 - inserting tasks
 - selecting tasks
+- filtering tasks by `done`
+- filtering tasks by `priority`
 - converting SQLite rows into JSON-friendly dictionaries
 - updating tasks
 - deleting tasks
@@ -892,6 +1182,38 @@ Client sends GET /api/tasks
 
 ---
 
+### Filtering Tasks by Done
+
+```text
+Client sends GET /api/tasks?done=0
+→ Flask route is called
+→ app.py reads the done query parameter
+→ app.py validates done
+→ app.py converts done from string to integer
+→ app.py calls get_tasks_by_done(done)
+→ db.py selects rows where done matches the value
+→ db.py converts rows into task objects
+→ app.py returns the list as JSON
+```
+
+---
+
+### Filtering Tasks by Priority
+
+```text
+Client sends GET /api/tasks?priority=2
+→ Flask route is called
+→ app.py reads the priority query parameter
+→ app.py validates priority
+→ app.py converts priority from string to integer
+→ app.py calls get_tasks_by_priority(priority)
+→ db.py selects rows where priority matches the value
+→ db.py converts rows into task objects
+→ app.py returns the list as JSON
+```
+
+---
+
 ### Getting One Task
 
 ```text
@@ -908,6 +1230,20 @@ If the task does not exist:
 ```text
 db.py returns None
 → app.py returns 404 NOT FOUND
+```
+
+---
+
+### Updating Task Title
+
+```text
+Client sends PATCH /api/tasks/title/<id>
+→ Flask receives JSON body
+→ app.py checks and validates title
+→ app.py calls update_task_title(task_id, title)
+→ db.py updates the task title in SQLite
+→ app.py gets the updated task
+→ app.py returns the updated task object as JSON
 ```
 
 ---
@@ -991,6 +1327,7 @@ It focuses on:
 - Flask routes
 - SQLite basics
 - CRUD operations
+- query parameters
 - JSON request and response
 - HTTP status codes
 - request validation
@@ -1001,7 +1338,7 @@ This project does not include:
 
 - user authentication
 - frontend interface
-- query filters
+- combined query filters
 - automated tests
 - deployment configuration
 - production database setup
@@ -1012,7 +1349,7 @@ This project does not include:
 
 Future improvements:
 
-- Add query filters for `done` and `priority`
+- Add combined query filters such as `done=0&priority=2`
 - Add maximum title length validation
 - Add pagination
 - Add automated tests
@@ -1033,6 +1370,8 @@ Current version:
 - Request validation for `priority` works
 - Separate database layer exists
 - Tasks are returned as JSON objects
+- Task `title` update route works
+- Query filter by `done` works
+- Query filter by `priority` works
 - Main routes were manually checked
 - Project is ready for GitHub upload as a learning backend project
-- Task `title` update route works
