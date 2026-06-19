@@ -594,7 +594,10 @@ Content-Type: application/json
 
 ```json
 {
-  "id": 1
+  "id": 1,
+  "title": "learn Flask",
+  "done": 0,
+  "priority": 2
 }
 ```
 
@@ -605,6 +608,8 @@ Status code:
 ```
 
 The `id` can be different depending on the current database state.
+
+After creating a task, the API returns the full created task object.
 
 ---
 
@@ -1163,7 +1168,8 @@ Client sends POST /api/tasks
 → db.py inserts the task into SQLite
 → SQLite creates a new id
 → db.py returns the new id
-→ app.py returns JSON response with the id
+→ app.py gets the created task by id
+→ app.py returns JSON response with the created task object
 ```
 
 ---
@@ -1375,3 +1381,4 @@ Current version:
 - Query filter by `priority` works
 - Main routes were manually checked
 - Project is ready for GitHub upload as a learning backend project
+- `POST /api/tasks` returns the created task object

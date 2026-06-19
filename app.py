@@ -43,8 +43,9 @@ def api_create_task():
         return jsonify({"error": "priority must be 1, 2 or 3"}), 400
 
     task_id = create_task(title, done, priority)
+    task = get_task_by_id(task_id)
 
-    return jsonify({"id": task_id}), 201
+    return jsonify(task), 201
 
 
 @app.get("/api/tasks")
