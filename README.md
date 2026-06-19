@@ -23,6 +23,7 @@ This is a learning backend project that demonstrates:
 - Get one task by id
 - Filter tasks by `done`
 - Filter tasks by `priority`
+- Filter tasks by `done` and `priority` together
 - Create a new task
 - Update task `title`
 - Update task `done` status
@@ -255,7 +256,7 @@ Status code:
 
 ## Query Filters
 
-The `GET /api/tasks` route supports single query filters.
+The `GET /api/tasks` route supports query filters.
 
 Supported filters:
 
@@ -264,7 +265,7 @@ done
 priority
 ```
 
-Currently, the API supports one filter at a time.
+The filters can be used separately or together.
 
 ---
 
@@ -526,6 +527,50 @@ Status code:
 
 ```text
 400 BAD REQUEST
+```
+
+---
+
+## Combined Query Filters
+
+The `done` and `priority` filters can be used together.
+
+### Request
+
+```http
+GET /api/tasks?done=0&priority=2
+```
+
+Returns tasks where:
+
+```text
+done = 0
+priority = 2
+```
+
+Meaning:
+
+```text
+not done and normal priority
+```
+
+### Response
+
+```json
+[
+  {
+    "id": 1,
+    "title": "learn Flask",
+    "done": 0,
+    "priority": 2
+  }
+]
+```
+
+Status code:
+
+```text
+200 OK
 ```
 
 ---
@@ -1188,34 +1233,35 @@ Client sends GET /api/tasks
 
 ---
 
-### Filtering Tasks by Done
+### Filtering Tasks
 
 ```text
-Client sends GET /api/tasks?done=0
+Client sends GET /api/tasks with optional query parameters
 → Flask route is called
-→ app.py reads the done query parameter
-→ app.py validates done
-→ app.py converts done from string to integer
-→ app.py calls get_tasks_by_done(done)
-→ db.py selects rows where done matches the value
+→ app.py reads the done and priority query parameters
+→ app.py validates done if it exists
+→ app.py validates priority if it exists
+→ app.py converts query values from strings to integers
+→ app.py calls get_tasks(done, priority)
+→ db.py selects rows using the provided filters
 → db.py converts rows into task objects
 → app.py returns the list as JSON
 ```
 
----
-
-### Filtering Tasks by Priority
+Examples:
 
 ```text
-Client sends GET /api/tasks?priority=2
-→ Flask route is called
-→ app.py reads the priority query parameter
-→ app.py validates priority
-→ app.py converts priority from string to integer
-→ app.py calls get_tasks_by_priority(priority)
-→ db.py selects rows where priority matches the value
-→ db.py converts rows into task objects
-→ app.py returns the list as JSON
+GET /api/tasks
+→ returns all tasks
+
+GET /api/tasks?done=0
+→ returns tasks where done = 0
+
+GET /api/tasks?priority=2
+→ returns tasks where priority = 2
+
+GET /api/tasks?done=0&priority=2
+→ returns tasks where done = 0 and priority = 2
 ```
 
 ---
@@ -1344,7 +1390,6 @@ This project does not include:
 
 - user authentication
 - frontend interface
-- combined query filters
 - automated tests
 - deployment configuration
 - production database setup
@@ -1355,7 +1400,6 @@ This project does not include:
 
 Future improvements:
 
-- Add combined query filters such as `done=0&priority=2`
 - Add maximum title length validation
 - Add pagination
 - Add automated tests
@@ -1382,3 +1426,4 @@ Current version:
 - Main routes were manually checked
 - Project is ready for GitHub upload as a learning backend project
 - `POST /api/tasks` returns the created task object
+- Combined query filters work

@@ -53,44 +53,31 @@ def create_task(title, done, priority):
     return task_id
 
 
-def get_all_tasks():
+def get_tasks(done, priority):
     conn = get_connection()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT id, title, done, priority FROM tasks ORDER BY id DESC")
-    rows = cursor.fetchall()
+    if done is not None or priority is not None:
+        if done is not None and priority is not None:
+            cursor.execute(
+                "SELECT id, title, done, priority FROM tasks WHERE done = ? AND priority = ? ORDER BY id DESC",
+                (done, priority),
+            )
 
-    tasks = [row_to_task(row) for row in rows]
+        elif done is not None:
+            cursor.execute(
+                "SELECT id, title, done, priority FROM tasks WHERE done = ? ORDER BY id DESC",
+                (done,),
+            )
 
-    conn.close()
-    return tasks
+        else:
+            cursor.execute(
+                "SELECT id, title, done, priority FROM tasks WHERE priority = ? ORDER BY id DESC",
+                (priority,),
+            )
 
-
-def get_tasks_by_done(done):
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    cursor.execute(
-        "SELECT id, title, done, priority FROM tasks WHERE done = ? ORDER BY id DESC",
-        (done,),
-    )
-
-    rows = cursor.fetchall()
-
-    tasks = [row_to_task(row) for row in rows]
-
-    conn.close()
-    return tasks
-
-
-def get_tasks_by_priority(priority):
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    cursor.execute(
-        "SELECT id, title, done, priority FROM tasks WHERE priority = ? ORDER BY id DESC",
-        (priority,),
-    )
+    else:
+        cursor.execute("SELECT id, title, done, priority FROM tasks ORDER BY id DESC")
 
     rows = cursor.fetchall()
 
