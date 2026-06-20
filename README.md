@@ -724,6 +724,22 @@ Status code:
 400 BAD REQUEST
 ```
 
+The `title` value must be 100 characters or less.
+
+If `title` is longer than 100 characters:
+
+```json
+{
+  "error": "title must be 100 characters or less"
+}
+```
+
+Status code:
+
+```text
+400 BAD REQUEST
+```
+
 ---
 
 ### Done Validation
@@ -846,6 +862,22 @@ If `title` is empty or contains only spaces:
 ```json
 {
   "error": "title must be a non-empty string"
+}
+```
+
+Status code:
+
+```text
+400 BAD REQUEST
+```
+
+The `title` value must be 100 characters or less.
+
+If `title` is longer than 100 characters:
+
+```json
+{
+  "error": "title must be 100 characters or less"
 }
 ```
 
@@ -1224,8 +1256,10 @@ Client sends POST /api/tasks
 ```text
 Client sends GET /api/tasks
 → Flask route is called
-→ app.py calls get_all_tasks()
-→ db.py reads rows from SQLite
+→ app.py reads the done and priority query parameters
+→ both query parameters are None
+→ app.py calls get_tasks(done, priority)
+→ db.py reads all rows from SQLite
 → db.py converts each row into a task object
 → db.py returns a list of task objects
 → app.py returns the list as JSON
@@ -1400,7 +1434,6 @@ This project does not include:
 
 Future improvements:
 
-- Add maximum title length validation
 - Add pagination
 - Add automated tests
 - Add Docker support later
@@ -1427,3 +1460,4 @@ Current version:
 - Project is ready for GitHub upload as a learning backend project
 - `POST /api/tasks` returns the created task object
 - Combined query filters work
+- Title length validation works

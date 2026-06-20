@@ -31,6 +31,11 @@ def api_create_task():
     if not isinstance(title, str) or not title.strip():
         return jsonify({"error": "title must be a non-empty string"}), 400
 
+    title = title.strip()
+
+    if len(title) > 100:
+        return jsonify({"error": "title must be 100 characters or less"}), 400
+
     done = data["done"]
     priority = data["priority"]
 
@@ -88,6 +93,11 @@ def api_update_task_title(task_id):
 
     if not isinstance(title, str) or not title.strip():
         return jsonify({"error": "title must be a non-empty string"}), 400
+
+    title = title.strip()
+
+    if len(title) > 100:
+        return jsonify({"error": "title must be 100 characters or less"}), 400
 
     updated_count = update_task_title(task_id, title)
 
