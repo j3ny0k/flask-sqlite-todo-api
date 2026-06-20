@@ -51,37 +51,19 @@ def api_get_tasks():
     done = request.args.get("done")
     priority = request.args.get("priority")
 
-    if done is not None or priority is not None:
-        if done is not None and priority is not None:
-            if done not in ["0", "1"]:
-                return jsonify({"error": "done must be 0 or 1"}), 400
+    if done is not None:
+        if done not in ["0", "1"]:
+            return jsonify({"error": "done must be 0 or 1"}), 400
 
-            done = int(done)
+        done = int(done)
 
-            if priority not in ["1", "2", "3"]:
-                return jsonify({"error": "priority must be 1, 2 or 3"}), 400
+    if priority is not None:
+        if priority not in ["1", "2", "3"]:
+            return jsonify({"error": "priority must be 1, 2 or 3"}), 400
 
-            priority = int(priority)
+        priority = int(priority)
 
-            tasks = get_tasks(done, priority)
-
-        elif done is not None:
-            if done not in ["0", "1"]:
-                return jsonify({"error": "done must be 0 or 1"}), 400
-
-            done = int(done)
-            tasks = get_tasks(done, priority=None)
-
-        else:
-            if priority not in ["1", "2", "3"]:
-                return jsonify({"error": "priority must be 1, 2 or 3"}), 400
-
-            priority = int(priority)
-            tasks = get_tasks(None, priority)
-
-    else:
-        tasks = get_tasks(done=None, priority=None)
-
+    tasks = get_tasks(done, priority)
     return jsonify(tasks), 200
 
 
