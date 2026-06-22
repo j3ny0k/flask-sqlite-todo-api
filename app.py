@@ -14,17 +14,9 @@ from db import (
 app = Flask(__name__)
 
 
-@app.get("/")
-def home():
-    return jsonify({"message": "Flask is working"}), 200
-
-
-@app.post("/api/tasks")
-def api_create_task():
-    data = request.get_json()
-
-    if not data or "title" not in data or "done" not in data or "priority" not in data:
-        return jsonify({"error": "title, done and priority are required"}), 400
+def validate_title(data):
+    if not data or "title" not in data:
+        return jsonify({"error": "title is required"}), 400
 
     title = data["title"]
 
@@ -36,14 +28,62 @@ def api_create_task():
     if len(title) > 100:
         return jsonify({"error": "title must be 100 characters or less"}), 400
 
+    return title
+
+
+def validate_done(data):
+    if not data or "done" not in data:
+        return jsonify({"error": "done is required"}), 400
+
     done = data["done"]
-    priority = data["priority"]
 
     if done not in [0, 1]:
         return jsonify({"error": "done must be 0 or 1"}), 400
 
+    return done
+
+
+def validate_priority(data):
+    if not data or "priority" not in data:
+        return jsonify({"error": "priority is required"}), 400
+
+    priority = data["priority"]
+
     if priority not in [1, 2, 3]:
         return jsonify({"error": "priority must be 1, 2 or 3"}), 400
+
+    return priority
+
+
+@app.get("/")
+def home():
+    return jsonify({"message": "Flask is working"}), 200
+
+
+@app.post("/api/tasks")
+def api_create_task():
+    data = request.get_json()
+
+    result = validate_title(data)
+
+    if not isinstance(result, str):
+        return result
+
+    title = result
+
+    result = validate_done(data)
+
+    if not isinstance(result, int):
+        return result
+
+    done = result
+
+    result = validate_priority(data)
+
+    if not isinstance(result, int):
+        return result
+
+    priority = result
 
     task_id = create_task(title, done, priority)
     task = get_task_by_id(task_id)
@@ -86,18 +126,12 @@ def api_get_task_by_id(task_id):
 def api_update_task_title(task_id):
     data = request.get_json()
 
-    if not data or "title" not in data:
-        return jsonify({"error": "title is required"}), 400
+    result = validate_title(data)
 
-    title = data["title"]
+    if not isinstance(result, str):
+        return result
 
-    if not isinstance(title, str) or not title.strip():
-        return jsonify({"error": "title must be a non-empty string"}), 400
-
-    title = title.strip()
-
-    if len(title) > 100:
-        return jsonify({"error": "title must be 100 characters or less"}), 400
+    title = result
 
     updated_count = update_task_title(task_id, title)
 
@@ -112,13 +146,12 @@ def api_update_task_title(task_id):
 def api_update_task_done(task_id):
     data = request.get_json()
 
-    if not data or "done" not in data:
-        return jsonify({"error": "done is required"}), 400
+    result = validate_done(data)
 
-    done = data["done"]
+    if not isinstance(result, int):
+        return result
 
-    if done not in [0, 1]:
-        return jsonify({"error": "done must be 0 or 1"}), 400
+    done = result
 
     updated_count = update_task_done(task_id, done)
 
@@ -133,13 +166,12 @@ def api_update_task_done(task_id):
 def api_update_task_priority(task_id):
     data = request.get_json()
 
-    if not data or "priority" not in data:
-        return jsonify({"error": "priority is required"}), 400
+    result = validate_priority(data)
 
-    priority = data["priority"]
+    if not isinstance(result, int):
+        return result
 
-    if priority not in [1, 2, 3]:
-        return jsonify({"error": "priority must be 1, 2 or 3"}), 400
+    priority = result
 
     updated_count = update_task_priority(task_id, priority)
 

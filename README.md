@@ -670,11 +670,29 @@ done
 priority
 ```
 
-If one of these fields is missing:
+If one of these fields is missing, the API returns a specific validation error.
+
+Missing `title`:
 
 ```json
 {
-  "error": "title, done and priority are required"
+  "error": "title is required"
+}
+```
+
+Missing `done`:
+
+```json
+{
+  "error": "done is required"
+}
+```
+
+Missing `priority`:
+
+```json
+{
+  "error": "priority is required"
 }
 ```
 
@@ -1461,3 +1479,4 @@ Current version:
 - `POST /api/tasks` returns the created task object
 - Combined query filters work
 - Title length validation works
+- Validation logic was moved into separate helper functions
