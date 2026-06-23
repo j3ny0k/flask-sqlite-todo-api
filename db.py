@@ -57,27 +57,25 @@ def get_tasks(done, priority):
     conn = get_connection()
     cursor = conn.cursor()
 
-    if done is not None or priority is not None:
-        if done is not None and priority is not None:
-            cursor.execute(
-                "SELECT id, title, done, priority FROM tasks WHERE done = ? AND priority = ? ORDER BY id DESC",
-                (done, priority),
-            )
+    sql = "SELECT id, title, done, priority FROM tasks"
+    conditions = []
+    params = []
 
-        elif done is not None:
-            cursor.execute(
-                "SELECT id, title, done, priority FROM tasks WHERE done = ? ORDER BY id DESC",
-                (done,),
-            )
+    if done is not None:
+        conditions.append("done = ?")
+        params.append(done)
 
-        else:
-            cursor.execute(
-                "SELECT id, title, done, priority FROM tasks WHERE priority = ? ORDER BY id DESC",
-                (priority,),
-            )
+    if priority is not None:
+        conditions.append("priority = ?")
+        params.append(priority)
 
-    else:
-        cursor.execute("SELECT id, title, done, priority FROM tasks ORDER BY id DESC")
+    if conditions:
+        sql += " WHERE "
+        sql += " AND ".join(conditions)
+
+    sql += " ORDER BY id DESC"
+
+    cursor.execute(sql, params)
 
     rows = cursor.fetchall()
 
