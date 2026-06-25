@@ -198,7 +198,7 @@ def api_delete_task_by_id(task_id):
     if deleted_count == 0:
         return jsonify({"error": "task not found"}), 404
 
-    return jsonify({"message": "task deleted"}), 200
+    return jsonify({"message": "task deleted", "id": task_id}), 200
 
 
 @app.delete("/api/tasks")

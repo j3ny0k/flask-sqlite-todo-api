@@ -1138,6 +1138,7 @@ DELETE /api/tasks/1
 
 ```json
 {
+  "id": 1,
   "message": "task deleted"
 }
 ```
@@ -1387,7 +1388,7 @@ Client sends DELETE /api/tasks/<id>
 → Flask route is called
 → app.py calls delete_task_by_id(task_id)
 → db.py deletes the task from SQLite
-→ app.py returns success message
+→ app.py returns success message with deleted task id
 ```
 
 ---
