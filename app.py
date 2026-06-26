@@ -14,6 +14,10 @@ from db import (
 app = Flask(__name__)
 
 
+def is_validation_error(result):
+    return isinstance(result, tuple)
+
+
 def get_required_field(data, field):
     if not data or field not in data:
         return jsonify({"error": f"{field} is required"}), 400
@@ -26,7 +30,7 @@ def get_required_field(data, field):
 def validate_title(data):
     title = get_required_field(data, "title")
 
-    if isinstance(title, tuple):
+    if is_validation_error(title):
         return title
 
     if not isinstance(title, str) or not title.strip():
@@ -43,7 +47,7 @@ def validate_title(data):
 def validate_done(data):
     done = get_required_field(data, "done")
 
-    if isinstance(done, tuple):
+    if is_validation_error(done):
         return done
 
     if done not in [0, 1]:
@@ -55,7 +59,7 @@ def validate_done(data):
 def validate_priority(data):
     priority = get_required_field(data, "priority")
 
-    if isinstance(priority, tuple):
+    if is_validation_error(priority):
         return priority
 
     if priority not in [1, 2, 3]:
