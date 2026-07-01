@@ -20,6 +20,7 @@ This is a learning backend project that demonstrates:
 
 - Check if the API is running
 - Get all tasks
+- Get task statistics
 - Get one task by id
 - Filter tasks by `done`
 - Filter tasks by `priority`
@@ -163,6 +164,7 @@ When the app starts, it calls `init_db()` and creates the `tasks` table if it do
 | -------- | -------------------------- | ------------------------------- |
 | `GET`    | `/`                        | Check if Flask is working       |
 | `GET`    | `/api/tasks`               | Get all tasks or filtered tasks |
+| `GET`    | `/api/tasks/stats`         | Get task statistics             |
 | `GET`    | `/api/tasks/<id>`          | Get one task by id              |
 | `POST`   | `/api/tasks`               | Create a new task               |
 | `PATCH`  | `/api/tasks/title/<id>`    | Update task `title`             |
@@ -572,6 +574,77 @@ Status code:
 ```text
 200 OK
 ```
+
+---
+
+## Get Task Statistics
+
+### Request
+
+```http
+GET /api/tasks/stats
+```
+
+### Response
+
+```json
+{
+  "total": 5,
+  "done": 2,
+  "not_done": 3,
+  "by_priority": {
+    "1": 1,
+    "2": 3,
+    "3": 1
+  }
+}
+```
+
+Status code:
+
+```text
+200 OK
+```
+
+### Response Fields
+
+```text
+total      → total number of tasks
+done       → number of completed tasks
+not_done   → number of not completed tasks
+by_priority → number of tasks grouped by priority
+```
+
+Priority keys:
+
+```text
+"1" → priority 1
+"2" → priority 2
+"3" → priority 3
+```
+
+If there are no tasks:
+
+```json
+{
+  "total": 0,
+  "done": 0,
+  "not_done": 0,
+  "by_priority": {
+    "1": 0,
+    "2": 0,
+    "3": 0
+  }
+}
+```
+
+Status code:
+
+```text
+200 OK
+```
+
+This is not an error. It means the database is working, but there are no tasks yet.
 
 ---
 
@@ -1243,6 +1316,8 @@ It is responsible for:
 - selecting tasks
 - filtering tasks by `done`
 - filtering tasks by `priority`
+- counting task statistics
+- grouping tasks by priority
 - converting SQLite rows into JSON-friendly dictionaries
 - updating tasks
 - deleting tasks
@@ -1316,6 +1391,26 @@ GET /api/tasks?priority=2
 GET /api/tasks?done=0&priority=2
 → returns tasks where done = 0 and priority = 2
 ```
+
+---
+
+### Getting Task Statistics
+
+```text
+Client sends GET /api/tasks/stats
+→ Flask route is called
+→ app.py calls get_task_stats()
+→ db.py counts all tasks
+→ db.py counts done tasks
+→ db.py counts not_done tasks
+→ db.py groups tasks by priority
+→ db.py creates a statistics dictionary
+→ app.py returns the dictionary as JSON
+```
+
+The `by_priority` field always contains priority keys `1`, `2`, and `3`.
+
+If there are no tasks for a priority, its value is `0`.
 
 ---
 
@@ -1481,3 +1576,6 @@ Current version:
 - Combined query filters work
 - Title length validation works
 - Validation logic was moved into separate helper functions
+- `GET /api/tasks/stats` works
+- Task statistics are returned as JSON
+- Tasks are counted by total, done, not_done, and priority

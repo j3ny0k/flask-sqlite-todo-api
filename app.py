@@ -3,6 +3,7 @@ from db import (
     init_db,
     create_task,
     get_tasks,
+    get_task_stats,
     get_task_by_id,
     update_task_title,
     update_task_done,
@@ -133,6 +134,11 @@ def api_get_task_by_id(task_id):
         return jsonify({"error": "task not found"}), 404
 
     return jsonify(task), 200
+
+
+@app.get("/api/tasks/stats")
+def api_get_task_stats():
+    return get_task_stats(), 200
 
 
 @app.patch("/api/tasks/title/<int:task_id>")

@@ -85,6 +85,43 @@ def get_tasks(done, priority):
     return tasks
 
 
+def get_task_stats():
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT COUNT(*) FROM tasks")
+    all_rows = cursor.fetchone()[0]
+
+    cursor.execute("SELECT COUNT(*) FROM tasks WHERE done = 1")
+    rows_done = cursor.fetchone()[0]
+
+    cursor.execute("SELECT COUNT(*) FROM tasks WHERE done = 0")
+    rows_undone = cursor.fetchone()[0]
+
+    cursor.execute(
+        "SELECT priority, COUNT(*) FROM tasks GROUP BY priority ORDER BY priority"
+    )
+    rows_by_priority = cursor.fetchall()
+
+    by_priority = {"1": 0, "2": 0, "3": 0}
+
+    for field in rows_by_priority:
+        priority = field[0]
+        count = field[1]
+
+        by_priority[str(priority)] = count
+
+    response = {
+        "total": all_rows,
+        "done": rows_done,
+        "not_done": rows_undone,
+        "by_priority": by_priority,
+    }
+
+    conn.close()
+    return response
+
+
 def get_task_by_id(task_id):
     conn = get_connection()
     cursor = conn.cursor()
